@@ -1,19 +1,16 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.AI;
 
 public class AIControl : MonoBehaviour {
 
-	GameObject[] goalLocations;
-	UnityEngine.AI.NavMeshAgent agent;
+	NavMeshAgent agent;
     Animator anim;
     Vector3 lastGoal;
 
 
 	// Use this for initialization
 	void Start () {
-		goalLocations = GameObject.FindGameObjectsWithTag("goal");
+		
 		agent = this.GetComponent<UnityEngine.AI.NavMeshAgent>();
         anim = GetComponent<Animator>();
         anim.SetBool("isWalking", true);
@@ -23,7 +20,8 @@ public class AIControl : MonoBehaviour {
     void PickGoalLocation()
     {
         lastGoal = agent.destination;
-        agent.SetDestination(goalLocations[Random.Range(0, goalLocations.Length)].transform.position);
+        GameObject goalPos= GameEnvironment.Singleton.GetRandomGoal();
+        agent.SetDestination(goalPos.transform.position);
     }
 
 	
@@ -36,10 +34,19 @@ public class AIControl : MonoBehaviour {
 
         foreach(GameObject go in GameEnvironment.Singleton.Obstacles)
         {
-            if(Vector3.Distance(go.transform.position, this.transform.position)<5)
+            int randomNumber = Random.Range(0, 100);
+            Debug.Log(randomNumber);
+            float distance = Vector3.Distance(go.transform.position, this.transform.position);
+            if (distance < 5 && randomNumber<5)
             {
                 agent.SetDestination(lastGoal);
             }
+            else if (distance < 1)
+            {
+                GameEnvironment.Singleton.RemoveObstacles(go);
+                break;
+            }
+
         }
 	}
 }
